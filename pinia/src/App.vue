@@ -16,11 +16,15 @@
 
     </nav>
 
+    <div class="loading" v-if="loading">
+      Loading Tasks...
+    </div>
+
     <!-- task list -->
 
     <div class="task-list" v-if="filter ==='all'">
-      <p>You have {{ taskStore.totalCount }} task left to do</p>
-      <div v-for="task in taskStore.tasks">
+      <p>You have {{ totalCount }} task left to do</p>
+      <div v-for="task in tasks">
         <TasksDetails :task="task"/>
 
       </div>  
@@ -29,8 +33,8 @@
  
 
     <div class="task-list" v-if="filter ==='favs'">
-           <p>You have {{ taskStore.favCount }} favs left to do</p>
-      <div v-for="task in taskStore.Favs">
+           <p>You have {{ favCount }} favs left to do</p>
+      <div v-for="task in Favs">
         <TasksDetails :task="task"/>
 
       </div>  
@@ -39,23 +43,20 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import {ref} from 'vue'
+import {storeToRefs} from 'pinia'
   import {useTaskStore} from './stores/taskStore.js'
   import TasksDetails from './components/TasksDetails.vue'
   import TaskForm from './components/TaskForm.vue'
-  
-  export default {
-    components :{TasksDetails, TaskForm},
    
-    setup(){
-      const taskStore = useTaskStore()
+  const taskStore = useTaskStore()
+  taskStore.getTasks()
 
-      const filter = ref('all')
-      return {taskStore, filter}
-    }
-    
-  }
+  const filter = ref('all')
+
+  const {tasks, loading, Favs, totalCount, favCount} = storeToRefs(taskStore) // this converts state and getters to refs making them reactive. Cant be used for actions
+     
 </script>
 
 

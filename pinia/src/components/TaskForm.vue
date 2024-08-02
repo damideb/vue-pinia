@@ -5,12 +5,11 @@
   </form>
 </template>
 
-<script>
+<script setup>
 import {useTaskStore} from '../stores/taskStore.js'
 import {ref} from 'vue'
-export default {
 
-    setup(){
+
         const taskStore= useTaskStore()
         const newTask= ref('')
 
@@ -19,14 +18,11 @@ export default {
                 taskStore.addTask({
                     title:newTask.value,
                     isFav:false,
-                    id:Math.floor(Math.random()*10000)
+                    id: Math.floor(Math.random()*10000).toString()
 
                 })
 
                 newTask.value=''
-            }
-        }
-        return {handleSubmit,newTask}
-    }
-};
+            }}
+        
 </script>

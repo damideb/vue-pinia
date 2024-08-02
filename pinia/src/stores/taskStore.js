@@ -1,40 +1,73 @@
 import { defineStore } from "pinia";
 
-export const useTaskStore = defineStore('taskStore', {
-
-    state:()=>({
-        tasks:[
-            {id:1, title:'buy milk', isFav: false},
-            {id:2, title:'Learn vue Pinia', isFav: true}
-        ],
-    }),
-    // getters get the state and compute values based on the state in the store
-    getters:{ 
-        Favs: (state)=>{
-            return state.tasks.filter(task =>task.isFav)
-        },
-        favCount:(state)=>{
-                return state.tasks.reduce((previous, current)=>{
-                    return current.isFav? previous + 1 : previous
-                },0)
-        },
-        totalCount(){
-          return  this.tasks.length
-        }
+export const useTaskStore = defineStore("taskStore", {
+  state: () => ({
+    tasks: [],
+    loading: false,
+  }),
+  // getters get the state and compute values based on the state in the store
+  getters: {
+    Favs: (state) => {
+      return state.tasks.filter((task) => task.isFav);
     },
-    actions:{
-        addTask(task){
-            this.tasks.push(task)
-        },
-        deleteTask(id){
-           this.tasks = this.tasks.filter(t=>{
-             return  t.id !== id
-            })
-        },
-        toggleFav(id){
-            const task = this.tasks.find(task => task.id === id)
+    favCount: (state) => {
+      return state.tasks.reduce((previous, current) => {
+        return current.isFav ? previous + 1 : previous;
+      }, 0);
+    },
+    totalCount() {
+      return this.tasks.length;
+    },
+  },
+  actions: {
+    async getTasks() {
+      this.loading = true;
+      const res = await fetch("http://localhost:3000/tasks");
+      const data = await res.json();
 
-            task.isFav = !task.isFav
-        }
-    }
-})
+      this.tasks = data;
+      this.loading = false;
+    },
+    async addTask(task) {
+      this.tasks.push(task);
+
+ const res = await fetch("http://localhost:3000/tasks", {
+   method: "POST",
+   body: JSON.stringify(task),
+   headers: { "Content-Type": "application/json" },
+ });
+
+      if (res.error) {
+        console.log(res.error);
+      }
+    },
+    async deleteTask(id) {
+      this.tasks = this.tasks.filter((t) => {
+        return t.id !== id;
+      });
+
+      const res = await fetch("http://localhost:3000/tasks/" + id, {
+        method: "DELETE",
+      });
+
+      if (res.error) {
+        console.log(res.error);
+      }
+    },
+    async toggleFav(id) {
+      const task = this.tasks.find((task) => task.id === id);
+
+      task.isFav = !task.isFav;
+
+      const res = await fetch("http://localhost:3000/tasks/" + id, {
+        method: "PATCH",
+        body: JSON.stringify({ isFav: task.isFav }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.error) {
+        console.log(res.error);
+      }
+    },
+  },
+});
